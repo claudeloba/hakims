@@ -78,9 +78,7 @@ const ProductDropdown = ({ product }: any) => {
         </DialogBody>
         <DialogActions>
           <Button onClick={() => setIsDialogOpen(false)}>Avbryt</Button>
-          <Button onClick={handleUpdateStock} color="primary">
-            Uppdatera
-          </Button>
+          <Button onClick={handleUpdateStock}>Uppdatera</Button>
         </DialogActions>
       </Dialog>
     </>
