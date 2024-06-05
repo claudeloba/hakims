@@ -10,11 +10,11 @@ import {
   pgTable,
   uuid,
   integer,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { url } from "inspector";
 
 export const User = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -35,7 +35,7 @@ export const userRelations = relations(User, ({ many }) => ({
 export const Product = pgTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  description: text("description"),
+  description: text("description").notNull(),
   price: real("price").notNull(),
   stock: integer("stock").notNull(),
   image_path: text("image_path").notNull(),
@@ -46,6 +46,7 @@ export const Product = pgTable("products", {
 });
 
 export const ProductSchema = createSelectSchema(Product);
+export const ProductInsertSchema = createInsertSchema(Product);
 
 export const productRelations = relations(Product, ({ many }) => ({
   orderItems: many(OrderItems),
@@ -58,6 +59,7 @@ export const Category = pgTable("categories", {
 });
 
 export const CategorySchema = createSelectSchema(Category);
+export const CategoryInsertSchema = createInsertSchema(Category);
 
 export const categoryRelations = relations(Category, ({ many }) => ({
   productCategories: many(ProductCategory),
@@ -79,6 +81,7 @@ export const ProductCategory = pgTable(
 );
 
 export const ProductCategorySchema = createSelectSchema(ProductCategory);
+export const ProductCategoryInsertSchema = createInsertSchema(ProductCategory);
 
 export const productCategoryRelations = relations(
   ProductCategory,
@@ -94,10 +97,12 @@ export const productCategoryRelations = relations(
   }),
 );
 
+export const statusENUM = pgEnum("status", ["processing", "delivered"]);
+
 export const Order = pgTable("orders", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => User.id, { onDelete: "cascade" }),
-  status: text("status").notNull(),
+  status: statusENUM("status").notNull(),
   totalPrice: real("total_price").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -119,7 +124,7 @@ export const OrderItems = pgTable("order_items", {
     onDelete: "cascade",
   }),
   productId: integer("product_id").references(() => Product.id, {
-    onDelete: "cascade",
+    onDelete: "restrict",
   }),
   quantity: integer("quantity").notNull(),
   price: real("price").notNull(),
