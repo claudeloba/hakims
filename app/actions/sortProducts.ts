@@ -13,7 +13,8 @@ export const getAllProducts = async (
     .from(Product)
     .leftJoin(ProductCategory, eq(Product.id, ProductCategory.productId))
     .leftJoin(Category, eq(ProductCategory.categoryId, Category.id))
-    .orderBy(orderBy === "name" ? Product.name : Product.stock);
+    .orderBy(orderBy === "name" ? Product.name : Product.stock)
+    .$dynamic();
 
   if (search) {
     query = query.where(ilike(Product.name, `%${search}%`));
