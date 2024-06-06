@@ -13,10 +13,10 @@ import { Button } from "@nextui-org/react";
 import { ProductSchema } from "@/drizzle/schema";
 import { z } from "zod";
 import { formatter } from "../utils/formatter";
+import AddButton from "./AddButton";
 
-type ProductType = z.infer<typeof ProductSchema>;
 interface ExampleProps {
-  product: ProductType;
+  product: GlobalProductType;
 }
 
 const reviews = { average: 4, totalCount: 1624 };
@@ -59,7 +59,7 @@ export default function Example({ product }: ExampleProps) {
                             reviews.average > rating
                               ? "text-yellow-400"
                               : "text-gray-300",
-                            "h-5 w-5 flex-shrink-0"
+                            "h-5 w-5 flex-shrink-0",
                           )}
                           aria-hidden="true"
                         />
@@ -95,7 +95,6 @@ export default function Example({ product }: ExampleProps) {
           </section>
         </div>
 
-        {/* Product image */}
         <div className="mt-10 lg:col-start-2 lg:row-span-2 lg:mt-0 lg:self-center">
           <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg">
             <Image
@@ -108,21 +107,10 @@ export default function Example({ product }: ExampleProps) {
           </div>
         </div>
 
-        {/* Product form */}
         <div className="mt-10 lg:col-start-1 lg:row-start-2 lg:max-w-lg lg:self-start">
           <section aria-labelledby="options-heading">
-            <h2 id="options-heading" className="sr-only">
-              Product options
-            </h2>
             <form>
-              <div className="mt-10">
-                <Button
-                  type="submit"
-                  className="flex w-full items-center justify-center rounded-md border border-transparent bg-dark-green-500 px-8 py-3 text-base font-medium text-white hover:bg-dark-green-300 focus:outline-none focus:ring-2 focus:ring-dark-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
-                >
-                  Lägg i varukorgen
-                </Button>
-              </div>
+              <div className="mt-10"></div>
             </form>
           </section>
         </div>

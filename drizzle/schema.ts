@@ -104,6 +104,7 @@ export const CombinedProductSchema = z.object({
 });
 
 export type CombinedProductType = z.infer<typeof CombinedProductSchema>;
+export type ProductType = z.infer<typeof ProductSchema>;
 
 export const statusENUM = pgEnum("status", ["processing", "delivered"]);
 

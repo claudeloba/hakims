@@ -3,23 +3,22 @@
 import { useState, useEffect } from "react";
 import { motion, LayoutGroup } from "framer-motion";
 import { Button } from "@nextui-org/react";
-import useCartStore from "@/stores/useCartStore";
 import { ProductSchema } from "@/drizzle/schema";
 import { z } from "zod";
-
-type ProductType = z.infer<typeof ProductSchema>;
+import useCart from "@/stores/useCart";
+import toast from "react-hot-toast";
 
 interface AddButtonProps {
-  item: ProductType;
+  item: GlobalProductType;
 }
 
 const AddButton = ({ item }: AddButtonProps) => {
-  const { addToCart, removeFromCart, cart } = useCartStore();
+  const { addItem, removeItem, items } = useCart();
   const [quantity, setQuantity] = useState(0);
   const [clicked, setClicked] = useState(false);
 
   useEffect(() => {
-    const cartItem = cart.find((cartItem) => cartItem.id === item.id);
+    const cartItem = items.find((cartItem) => cartItem.id === item.id);
     if (cartItem) {
       setQuantity(cartItem.quantity);
       setClicked(true);
@@ -27,23 +26,14 @@ const AddButton = ({ item }: AddButtonProps) => {
       setQuantity(0);
       setClicked(false);
     }
-  }, [cart, item.id]);
+  }, [items, item.id]);
 
   const handleIncrement = () => {
-    addToCart(item.id);
-    setQuantity(quantity + 1);
-    setClicked(true);
+    addItem({ ...item, quantity: 1 });
   };
 
   const handleDecrement = () => {
-    if (quantity > 1) {
-      removeFromCart(item.id);
-      setQuantity(quantity - 1);
-    } else {
-      removeFromCart(item.id);
-      setClicked(false);
-      setQuantity(0);
-    }
+    removeItem(item.id);
   };
 
   return (
@@ -78,10 +68,11 @@ const AddButton = ({ item }: AddButtonProps) => {
               </Button>
               <div className="w-1/3 text-center font-semibold">{quantity}</div>
               <Button
+                disabled={item.stock <= quantity}
                 variant="ghost"
                 isIconOnly
                 onClick={handleIncrement}
-                className="w-1/3 text-center rounded-xl"
+                className=" w-1/3 text-center rounded-xl disabled:text-white"
               >
                 +
               </Button>

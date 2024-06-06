@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import useCartStore from "@/stores/useCartStore";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
-import { Button } from "@nextui-org/react";
+import { Button, Modal } from "@nextui-org/react";
 import Image from "next/image";
 import { getCartDetails } from "@/app/actions/getCart";
 import { ProductSchema } from "@/drizzle/schema";
 import { z } from "zod";
 import AddButton from "./AddButton";
-
-type ProductType = z.infer<typeof ProductSchema>;
+import useCart from "@/stores/useCart";
+import { formatter } from "@/utils/formatter";
+import ClearCartButton from "./ClearCartButton";
 
 interface ShoppingCartProps {
-  initialCartDetails?: (ProductType & { quantity: number })[];
+  initialCartDetails?: (GlobalProductType & { quantity: number })[];
   initialTotalPrice?: number;
 }
 
@@ -22,76 +22,18 @@ const ShoppingCart = ({
   initialCartDetails = [],
   initialTotalPrice = 0,
 }: ShoppingCartProps) => {
-  const { cart, getAllCartItems, removeFromCart, removeAllFromCart } =
-    useCartStore();
-  const [cartDetails, setCartDetails] =
-    useState<(ProductType & { quantity: number })[]>(initialCartDetails);
-  const [totalPrice, setTotalPrice] = useState(initialTotalPrice);
+  const [isMounted, setIsMounted] = useState<Boolean>(false);
+  const { items, removeAll } = useCart();
 
   useEffect(() => {
-    const fetchCartData = async () => {
-      const cartItems = getAllCartItems();
-      const itemIds = cartItems.map((item) => item.id);
-      if (itemIds.length > 0) {
-        const products: ProductType[] = await getCartDetails(itemIds);
-        const detailedCartItems = products.map((product) => {
-          const cartItem = cartItems.find((item) => item.id === product.id);
-          return {
-            ...product,
-            quantity: cartItem ? cartItem.quantity : 0,
-          };
-        });
-        setCartDetails(detailedCartItems);
-        const total = detailedCartItems.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0,
-        );
-        setTotalPrice(total);
-      }
-    };
+    setIsMounted(true);
+  }, []);
 
-    fetchCartData();
-  }, [getAllCartItems]);
+  if (!isMounted) {
+    return null;
+  }
 
-  useEffect(() => {
-    const total = cartDetails.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
-    setTotalPrice(total);
-  }, [cartDetails]);
-
-  const handleRemove = (id: number) => {
-    removeFromCart(id);
-    const updatedCart = cartDetails.filter((item) => item.id !== id);
-    setCartDetails(updatedCart);
-    const total = updatedCart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
-    setTotalPrice(total);
-    localStorage.setItem(
-      "cart-storage",
-      JSON.stringify(updatedCart.map(({ id, quantity }) => ({ id, quantity }))),
-    );
-  };
-
-  const handleRemoveAll = (id: number) => {
-    removeAllFromCart(id);
-    const updatedCart = cartDetails.filter((item) => item.id !== id);
-    setCartDetails(updatedCart);
-    const total = updatedCart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
-    setTotalPrice(total);
-    localStorage.setItem(
-      "cart-storage",
-      JSON.stringify(updatedCart.map(({ id, quantity }) => ({ id, quantity }))),
-    );
-  };
-
-  if (cartDetails.length === 0) {
+  if (items.length === 0) {
     return <p>Din varukorg är tom.</p>;
   }
 
@@ -110,7 +52,7 @@ const ShoppingCart = ({
               role="list"
               className="divide-y divide-gray-200 border-b border-t border-gray-200"
             >
-              {cartDetails.map((product) => (
+              {items.map((product) => (
                 <li key={product.id} className="flex py-6">
                   <div className="flex-shrink-0">
                     <Image
@@ -133,7 +75,7 @@ const ShoppingCart = ({
                           </Link>
                         </h4>
                         <p className="ml-4 text-sm font-medium text-gray-900">
-                          {product.price * product.quantity} kr
+                          {formatter.format(product.price * product.quantity)}
                         </p>
                       </div>
                       <p className="mt-1 text-sm text-gray-500">
@@ -151,13 +93,6 @@ const ShoppingCart = ({
                         </span>
                       </p>
                       <div className="ml-4">
-                        <Button
-                          variant="bordered"
-                          onClick={() => handleRemoveAll(product.id)}
-                          className="text-sm font-medium text-dark-green-500 hover:text-dark-green-300"
-                        >
-                          <span>Ta bort vara</span>
-                        </Button>
                         <AddButton item={product} />
                       </div>
                     </div>
@@ -165,10 +100,12 @@ const ShoppingCart = ({
                 </li>
               ))}
             </ul>
-          </section>
+          </section>{" "}
           <section aria-labelledby="summary-heading" className="mt-10">
+            {" "}
             <h2 id="summary-heading" className="sr-only">
-              Order summary
+              {" "}
+              Order summary{" "}
             </h2>
             <div>
               <dl className="space-y-4">
@@ -176,8 +113,13 @@ const ShoppingCart = ({
                   <dt className="text-base font-medium text-gray-900">
                     Kostnad
                   </dt>
-                  <dd className="ml-4 text-base font-medium text-gray-900">
-                    {totalPrice} kr
+                  <dd className="ml-4 flex flex-col text-base font-medium text-gray-900">
+                    {formatter.format(
+                      items.reduce(
+                        (acc, item) => acc + item.price * item.quantity,
+                        0,
+                      ),
+                    )}
                   </dd>
                 </div>
               </dl>
@@ -193,6 +135,7 @@ const ShoppingCart = ({
                 Gå till kassan
               </Button>
             </div>
+            <ClearCartButton />
             <div className="mt-6 text-center text-sm">
               <p>
                 eller{" "}

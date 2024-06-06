@@ -17,7 +17,7 @@ import {
   Input,
 } from "@nextui-org/react";
 import { SignOutButton } from "@clerk/nextjs";
-import useCartStore from "@/stores/useCartStore";
+import useCart from "@/stores/useCart";
 
 const userNavigation = [{ name: "Logga ut", href: "#" }];
 
@@ -32,12 +32,12 @@ function classNames(...classes: any[]) {
 }
 
 const Navbar = () => {
-  const { cart, getTotalCount } = useCartStore();
-  const [totalItems, setTotalItems] = useState(0);
+  const { totalItems } = useCart();
+  const [totalItemsCount, setTotalItemsCount] = useState(0);
 
   useEffect(() => {
-    setTotalItems(getTotalCount());
-  }, [cart, getTotalCount]);
+    setTotalItemsCount(totalItems);
+  }, [totalItems]);
 
   return (
     <header className="top-0 bg-white sticky z-50">
@@ -74,7 +74,10 @@ const Navbar = () => {
               </a>
 
               <div className="ml-4 flow-root text-sm lg:relative lg:ml-8">
-                <div className="group -m-2 flex items-center p-2">
+                <Link
+                  href="/varukorg"
+                  className="group -m-2 flex items-center p-2"
+                >
                   <ShoppingCartIcon
                     className="h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
                     aria-hidden="true"
@@ -83,7 +86,7 @@ const Navbar = () => {
                     {totalItems > 10 ? "10+" : totalItems}
                   </span>
                   <span className="sr-only">items in cart, view bag</span>
-                </div>
+                </Link>
               </div>
               <UserPopover className="ml-4 flow-root text-sm lg:relative lg:ml-8">
                 <UserPopover.Button className="group -m-2 flex items-center p-2">
