@@ -18,6 +18,7 @@ import { notFound } from "next/navigation";
 import { getOrder } from "../../../../../queries/queries";
 import { formatter } from "../../../../../utils/formatter";
 import UpdateStatusButton from "../../../../../components/UpdateStatusButton";
+import { clerkClient } from "@clerk/nextjs/server";
 
 export async function generateMetadata({
   params,
@@ -33,6 +34,7 @@ export async function generateMetadata({
 
 export default async function Order({ params }: { params: { id: string } }) {
   let [order] = await getOrder(parseInt(params.id));
+  const user = await clerkClient.users.getUser(order.userId);
 
   if (!order) {
     notFound();
@@ -91,7 +93,10 @@ export default async function Order({ params }: { params: { id: string } }) {
         <DescriptionList>
           <DescriptionTerm>Kund</DescriptionTerm>
           <DescriptionDetails>
-            {order.userId || "Anonym handlare"}
+            {user.firstName ||
+              user.username ||
+              user.emailAddresses[0].emailAddress ||
+              "Anonym handlare"}
           </DescriptionDetails>
           <DescriptionTerm>Summa</DescriptionTerm>
           <DescriptionDetails>

@@ -12,13 +12,27 @@ import {
 import { getAllOrders } from "@/queries/queries";
 import { formatter } from "@/utils/formatter";
 import type { Metadata } from "next";
+import { clerkClient } from "@clerk/nextjs/server";
+import { fetchUserDetails } from "@/utils/fetchUserDetails";
 
 export const metadata: Metadata = {
   title: "Orders",
 };
 
 export default async function Orders() {
-  let orders = await getAllOrders();
+  const orders = await getAllOrders();
+
+  const ordersWithUserNames = await Promise.all(
+    orders.map(async (order) => {
+      const userDetails = await fetchUserDetails(order.userId);
+      return {
+        ...order,
+        userName: userDetails
+          ? `${userDetails.firstName} ${userDetails.lastName}`
+          : "Anonym handlare",
+      };
+    }),
+  );
 
   return (
     <>
@@ -35,7 +49,7 @@ export default async function Orders() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {orders.map((order) => (
+          {ordersWithUserNames.map((order) => (
             <TableRow
               key={order.id}
               href={`/admin/orders/${order.id}`}
@@ -45,7 +59,7 @@ export default async function Orders() {
               <TableCell className="text-zinc-500">
                 {order.createdAt?.toDateString()}
               </TableCell>
-              <TableCell>{order.userId || "Anonym handlare"}</TableCell>
+              <TableCell>{order.userName || "Anonym handlare"}</TableCell>
               <TableCell className="text-right">
                 {formatter.format(order.totalPrice)}
               </TableCell>

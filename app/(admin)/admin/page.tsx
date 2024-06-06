@@ -15,6 +15,7 @@ import { formatter } from "@/utils/formatter";
 import { fetchSalesData } from "@/app/actions/fetchSalesPerDate";
 import { getAllOrders } from "@/queries/queries";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { fetchUserDetails } from "@/utils/fetchUserDetails";
 
 export default async function Sales({
   searchParams,
@@ -23,9 +24,21 @@ export default async function Sales({
 }) {
   const period = searchParams.period || "last_week";
   const user = await currentUser();
+
   const { orders, totalSales, orderCount, averageTotalPrice } =
     await fetchSalesData(period);
 
+  const ordersWithUserNames = await Promise.all(
+    orders.map(async (order) => {
+      const userDetails = await fetchUserDetails(order.userId);
+      return {
+        ...order,
+        userName: userDetails
+          ? `${userDetails.firstName} ${userDetails.lastName}`
+          : "Anonym handlare",
+      };
+    }),
+  );
   const formattedTotalSales = formatter.format(totalSales);
   const formattedAvgSales = formatter.format(averageTotalPrice);
 
@@ -67,7 +80,7 @@ export default async function Sales({
           </TableRow>
         </TableHead>
         <TableBody>
-          {orders.map((order) => (
+          {ordersWithUserNames.map((order) => (
             <TableRow
               key={order.id}
               href={`/admin/orders/${order.id}`}
@@ -77,7 +90,7 @@ export default async function Sales({
               <TableCell className="text-zinc-500">
                 {order.createdAt?.toDateString()}
               </TableCell>
-              <TableCell>{order.userId || "Anonym handlare"}</TableCell>
+              <TableCell>{order.userName || "Anonym handlare"}</TableCell>
               <TableCell>
                 <Badge color={order.status === "delivered" ? "lime" : "pink"}>
                   {order.status}
