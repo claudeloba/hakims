@@ -40,6 +40,29 @@ export const getAllProducts = async (orderBy: "name" | "stock" = "name") => {
     .orderBy(orderBy === "name" ? Product.name : Product.stock);
 };
 
+export const getLatestProducts = async () => {
+  return await db
+    .select()
+    .from(Product)
+    .leftJoin(ProductCategory, eq(Product.id, ProductCategory.productId))
+    .leftJoin(Category, eq(ProductCategory.categoryId, Category.id))
+    .orderBy(desc(Product.createdAt))
+    .limit(10);
+};
+
+export const getProductsByCategory = async (
+  categoryName: string = "*",
+  orderBy: "name" | "createdAt" = "name",
+) => {
+  return await db
+    .select()
+    .from(Product)
+    .leftJoin(ProductCategory, eq(Product.id, ProductCategory.productId))
+    .leftJoin(Category, eq(ProductCategory.categoryId, Category.id))
+    .where(eq(Category.name, categoryName))
+    .orderBy(orderBy === "name" ? Product.name : Product.createdAt);
+};
+
 export const getProduct = async (id: number) => {
   return await db
     .select()

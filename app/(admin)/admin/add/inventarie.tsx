@@ -29,6 +29,9 @@ export function Inventarie({ error }: any) {
 
   return (
     <div className="grid grid-cols-2 gap-6">
+      {error.price && (
+        <div className="text-red-600 text-xs mt-2 -mb-4">{error.price}</div>
+      )}
       <Input
         min={0}
         type="number"
@@ -37,8 +40,8 @@ export function Inventarie({ error }: any) {
         placeholder="Kostnad per enhet"
         className="col-span-2"
       />
-      {error.price && (
-        <div className="text-red-600 text-xs mt-2 -mb-4">{error.price}</div>
+      {error.stock && (
+        <div className="text-red-600 text-xs mt-2 -mb-4">{error.stock}</div>
       )}
       <Input
         min={0}
@@ -48,9 +51,6 @@ export function Inventarie({ error }: any) {
         placeholder="Antal i lager"
         className="col-span-2"
       />
-      {error.stock && (
-        <div className="text-red-600 text-xs mt-2 -mb-4">{error.stock}</div>
-      )}
       <Listbox
         aria-label="Kategori"
         name="kategori"

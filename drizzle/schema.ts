@@ -97,6 +97,14 @@ export const productCategoryRelations = relations(
   }),
 );
 
+export const CombinedProductSchema = z.object({
+  products: ProductSchema,
+  categories: CategorySchema.nullable(),
+  product_categories: ProductCategorySchema.nullable(),
+});
+
+export type CombinedProductType = z.infer<typeof CombinedProductSchema>;
+
 export const statusENUM = pgEnum("status", ["processing", "delivered"]);
 
 export const Order = pgTable("orders", {
