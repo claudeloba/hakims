@@ -74,26 +74,16 @@ const Navbar = () => {
               </a>
 
               <div className="ml-4 flow-root text-sm lg:relative lg:ml-8">
-                <Popover
-                  showArrow
-                  offset={10}
-                  placement="bottom"
-                  backdrop="blur"
-                >
-                  <PopoverTrigger>
-                    <div className="group -m-2 flex items-center p-2">
-                      <ShoppingCartIcon
-                        className="h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
-                        aria-hidden="true"
-                      />
-                      <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                        {totalItems > 10 ? "10+" : totalItems}
-                      </span>
-                      <span className="sr-only">items in cart, view bag</span>
-                    </div>
-                  </PopoverTrigger>
-                  {/* Popover content goes here if needed */}
-                </Popover>
+                <div className="group -m-2 flex items-center p-2">
+                  <ShoppingCartIcon
+                    className="h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
+                    aria-hidden="true"
+                  />
+                  <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
+                    {totalItems > 10 ? "10+" : totalItems}
+                  </span>
+                  <span className="sr-only">items in cart, view bag</span>
+                </div>
               </div>
               <UserPopover className="ml-4 flow-root text-sm lg:relative lg:ml-8">
                 <UserPopover.Button className="group -m-2 flex items-center p-2">
