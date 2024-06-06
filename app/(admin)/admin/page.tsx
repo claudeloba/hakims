@@ -69,26 +69,22 @@ export default async function Sales({
         <TableBody>
           {orders.map((order) => (
             <TableRow
-              key={order.orders.id}
-              href={`/admin/orders/${order.orders.id}`}
-              title={`Order #${order.orders.id}`}
+              key={order.id}
+              href={`/admin/orders/${order.id}`}
+              title={`Order #${order.id}`}
             >
-              <TableCell>{order.orders.id}</TableCell>
+              <TableCell>{order.id}</TableCell>
               <TableCell className="text-zinc-500">
-                {order.orders.createdAt?.toDateString()}
+                {order.createdAt?.toDateString()}
               </TableCell>
+              <TableCell>{order.userId || "Anonym handlare"}</TableCell>
               <TableCell>
-                {order.users?.username || "Anonym handlare"}
-              </TableCell>
-              <TableCell>
-                <Badge
-                  color={order.orders.status === "delivered" ? "lime" : "pink"}
-                >
-                  {order.orders.status}
+                <Badge color={order.status === "delivered" ? "lime" : "pink"}>
+                  {order.status}
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                {formatter.format(order.orders.totalPrice)}
+                {formatter.format(order.totalPrice)}
               </TableCell>
             </TableRow>
           ))}

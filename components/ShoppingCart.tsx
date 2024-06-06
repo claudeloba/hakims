@@ -3,27 +3,20 @@
 import { useEffect, useState } from "react";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
-import { Button, Modal } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
 import Image from "next/image";
-import { getCartDetails } from "@/app/actions/getCart";
 import { ProductSchema } from "@/drizzle/schema";
 import { z } from "zod";
 import AddButton from "./AddButton";
 import useCart from "@/stores/useCart";
 import { formatter } from "@/utils/formatter";
 import ClearCartButton from "./ClearCartButton";
+import { createCheckoutSession } from "@/app/actions/checkout";
 
-interface ShoppingCartProps {
-  initialCartDetails?: (GlobalProductType & { quantity: number })[];
-  initialTotalPrice?: number;
-}
-
-const ShoppingCart = ({
-  initialCartDetails = [],
-  initialTotalPrice = 0,
-}: ShoppingCartProps) => {
-  const [isMounted, setIsMounted] = useState<Boolean>(false);
+const ShoppingCart = () => {
   const { items, removeAll } = useCart();
+  const [isMounted, setIsMounted] = useState<Boolean>(false);
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -37,13 +30,26 @@ const ShoppingCart = ({
     return <p>Din varukorg är tom.</p>;
   }
 
+  const handleCheckout = async (event: any) => {
+    event.preventDefault();
+    setIsCheckoutLoading(true);
+    try {
+      const sessionId = await createCheckoutSession(items);
+      window.location.href = `https://checkout.stripe.com/pay/${sessionId}`;
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+    } finally {
+      setIsCheckoutLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:px-0">
         <h1 className="text-center text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
           Din varukorg
         </h1>
-        <form className="mt-12">
+        <form className="mt-12" onSubmit={handleCheckout.bind(null, items)}>
           <section aria-labelledby="cart-heading">
             <h2 id="cart-heading" className="sr-only">
               Din varukorg
@@ -100,12 +106,10 @@ const ShoppingCart = ({
                 </li>
               ))}
             </ul>
-          </section>{" "}
+          </section>
           <section aria-labelledby="summary-heading" className="mt-10">
-            {" "}
             <h2 id="summary-heading" className="sr-only">
-              {" "}
-              Order summary{" "}
+              Order summary
             </h2>
             <div>
               <dl className="space-y-4">
@@ -131,8 +135,9 @@ const ShoppingCart = ({
               <Button
                 type="submit"
                 className="w-full rounded-md border border-transparent bg-dark-green-500 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-dark-green-300 focus:outline-none focus:ring-2 focus:ring-dark-green-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                disabled={isCheckoutLoading}
               >
-                Gå till kassan
+                {isCheckoutLoading ? "Laddar..." : "Gå till kassan"}
               </Button>
             </div>
             <ClearCartButton />

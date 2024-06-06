@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS "orders" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" varchar(255) NOT NULL,
+	"status" "status" NOT NULL,
+	"total_price" real NOT NULL,
+	"created_at" timestamp DEFAULT now(),
+	"updated_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "order_items" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"order_id" integer,
+	"product_id" integer,
+	"quantity" integer NOT NULL,
+	"price" real NOT NULL
+);
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "order_items" ADD CONSTRAINT "order_items_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "order_items" ADD CONSTRAINT "order_items_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE restrict ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;

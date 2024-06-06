@@ -83,6 +83,7 @@ export function AdminLayout({
   let pathname = usePathname();
   const { isLoaded, isSignedIn, user } = useUser();
 
+  console.log(user?.id);
   if (!isLoaded || !isSignedIn) {
     return null;
   }

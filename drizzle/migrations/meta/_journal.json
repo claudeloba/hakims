@@ -15,6 +15,34 @@
       "when": 1717551829006,
       "tag": "0001_spotty_whiplash",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1717688453183,
+      "tag": "0002_numerous_deathstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1717688525860,
+      "tag": "0003_sloppy_shen",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1717688555415,
+      "tag": "0004_woozy_thanos",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1717688606896,
+      "tag": "0005_solid_roughhouse",
+      "breakpoints": true
     }
   ]
 }

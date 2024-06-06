@@ -8,29 +8,12 @@ import {
   varchar,
   primaryKey,
   pgTable,
-  uuid,
   integer,
   pgEnum,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-
-export const User = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull(),
-  password: text("password").notNull(),
-  email: text("email").notNull().unique(),
-  admin: boolean("admin").default(false).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const UserSchema = createSelectSchema(User);
-
-export const userRelations = relations(User, ({ many }) => ({
-  orders: many(Order),
-}));
 
 export const Product = pgTable("products", {
   id: serial("id").primaryKey(),
@@ -110,7 +93,7 @@ export const statusENUM = pgEnum("status", ["processing", "delivered"]);
 
 export const Order = pgTable("orders", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => User.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
   status: statusENUM("status").notNull(),
   totalPrice: real("total_price").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -119,11 +102,7 @@ export const Order = pgTable("orders", {
 
 export const OrderSchema = createSelectSchema(Order);
 
-export const orderRelations = relations(Order, ({ many, one }) => ({
-  user: one(User, {
-    fields: [Order.userId],
-    references: [User.id],
-  }),
+export const orderRelations = relations(Order, ({ many }) => ({
   orderItems: many(OrderItems),
 }));
 

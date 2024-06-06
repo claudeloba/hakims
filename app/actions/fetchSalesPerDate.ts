@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/drizzle/db";
-import { Order, User } from "@/drizzle/schema";
-import { sql, eq, desc } from "drizzle-orm";
+import { Order } from "@/drizzle/schema";
+import { sql, desc } from "drizzle-orm";
 import { addDays } from "date-fns";
 
 const getDateRange = (period: string) => {
@@ -34,7 +34,6 @@ export const fetchSalesData = async (period: string) => {
   const ordersPromise = db
     .select()
     .from(Order)
-    .leftJoin(User, eq(Order.userId, User.id))
     .where(sql`${Order.createdAt} >= ${startDate}`)
     .orderBy(desc(Order.createdAt));
 
