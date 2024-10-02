@@ -5,13 +5,12 @@ import { CheckIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { Button } from "@nextui-org/react";
 import Image from "next/image";
-import { ProductSchema } from "@/drizzle/schema";
-import { z } from "zod";
 import AddButton from "./AddButton";
 import useCart from "@/stores/useCart";
 import { formatter } from "@/utils/formatter";
 import ClearCartButton from "./ClearCartButton";
-import { createCheckoutSession } from "@/app/actions/checkout";
+import { createOrder } from "@/app/actions/checkout";
+import toast from "react-hot-toast";
 
 const ShoppingCart = () => {
   const { items, removeAll } = useCart();
@@ -34,10 +33,11 @@ const ShoppingCart = () => {
     event.preventDefault();
     setIsCheckoutLoading(true);
     try {
-      const sessionId = await createCheckoutSession(items);
-      window.location.href = `https://checkout.stripe.com/pay/${sessionId}`;
+      const orderId = await createOrder(items);
+      toast("Beställning skapad!");
+      removeAll();
     } catch (error) {
-      console.error("Error creating checkout session:", error);
+      console.error("Error creating order:", error);
     } finally {
       setIsCheckoutLoading(false);
     }
@@ -49,14 +49,14 @@ const ShoppingCart = () => {
         <h1 className="text-center text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
           Din varukorg
         </h1>
-        <form className="mt-12" onSubmit={handleCheckout.bind(null, items)}>
+        <form className="mt-12" onSubmit={handleCheckout}>
           <section aria-labelledby="cart-heading">
             <h2 id="cart-heading" className="sr-only">
               Din varukorg
             </h2>
             <ul
               role="list"
-              className="divide-y divide-gray-200 border-b border-t border-gray-200"
+              className="divide-y divide-gray-200 border-b border-t border-gray-200 overflow-y-auto max-h-[500px] scrollbar-hide"
             >
               {items.map((product) => (
                 <li key={product.id} className="flex py-6">
@@ -121,8 +121,8 @@ const ShoppingCart = () => {
                     {formatter.format(
                       items.reduce(
                         (acc, item) => acc + item.price * item.quantity,
-                        0,
-                      ),
+                        0
+                      )
                     )}
                   </dd>
                 </div>
@@ -144,12 +144,12 @@ const ShoppingCart = () => {
             <div className="mt-6 text-center text-sm">
               <p>
                 eller{" "}
-                <a
+                <Link
                   href="/"
                   className="font-medium text-dark-green-500 hover:text-dark-green-300"
                 >
                   Fortsätt handla <span aria-hidden="true">&rarr;</span>
-                </a>
+                </Link>
               </p>
             </div>
           </section>
